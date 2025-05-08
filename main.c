@@ -48,25 +48,29 @@ int read(Reader *r, const char *filename) {
 		return -1;
 	}
 
-	char *line = NULL;
+	char *lineBuf = NULL;
 	size_t lineBufSize = 0;
 	int n = 0;
 
-	while (getline(&line, &lineBufSize, f) != -1) {
+	while (getline(&lineBuf, &lineBufSize, f) != -1) {
+		// Reallocate memory for the array of lines.
 		r->lines = realloc(r->lines, (r->size + 1) * sizeof(char *));
 		if (!r->lines) {
 			perror("allocation error");
-			free(r);
+			cleanup(r);
 			return -1;
 		}
 
-		r->lines[r->size] = malloc((strlen(line) + 1) * sizeof(char));
+		// Allocate memory for the line, and copy line buffer content.
+		r->lines[r->size] = malloc((strlen(lineBuf) + 1) * sizeof(char));
 		if (!r->lines[r->size]) {
 			perror("allocation error");
+			cleanup(r);
 			return -1;
 		}
-		strcpy(r->lines[r->size], line);
+		strcpy(r->lines[r->size], lineBuf);
 
+		// Replace new line characters with null terminator if non-empty.
 		size_t read = strlen(r->lines[r->size]);
 		if (read > 0 && r->lines[r->size][read - 1] == '\n') {
 			r->lines[r->size][read - 1] = '\0';
@@ -75,7 +79,7 @@ int read(Reader *r, const char *filename) {
 		n += read;
 		r->size++;
 	}
-	free(line);
+	free(lineBuf);
 
 	fclose(f);
 
