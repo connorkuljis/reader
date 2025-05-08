@@ -3,18 +3,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
+struct Reader {
 	char **lines;
 	size_t size;
-} Reader;
+};
 
-Reader *createReader();
-int read(Reader *c, const char *filename);
-void print(Reader *c);
-void cleanup(Reader *c);
+struct Reader *createReader();
+int read(struct Reader *c, const char *filename);
+void print(struct Reader *c);
+void cleanup(struct Reader *c);
 
 int main(void) {
-	Reader *r = createReader();
+	struct Reader *r = createReader();
 	if (r == NULL) {
 		perror("error reading file content");
 		exit(EXIT_FAILURE);
@@ -34,14 +34,14 @@ int main(void) {
 	return 0;
 }
 
-Reader *createReader() {
-	Reader *r = malloc(sizeof(Reader));
+struct Reader *createReader() {
+	struct Reader *r = malloc(sizeof(struct Reader));
 	r->lines = NULL;
 	r->size = 0;
 	return r;
 }
 
-int read(Reader *r, const char *filename) {
+int read(struct Reader *r, const char *filename) {
 	FILE *f = fopen(filename, "r");
 	if (!f) {
 		perror("error opening file");
@@ -86,13 +86,13 @@ int read(Reader *r, const char *filename) {
 	return n;
 }
 
-void print(Reader *c) {
+void print(struct Reader *c) {
 	for (int i = 0; i < c->size; i++) {
 		printf("%d: %s\n", i + 1, c->lines[i]);
 	}
 }
 
-void cleanup(Reader *c) {
+void cleanup(struct Reader *c) {
 	if (!c || !c->size) {
 		return;
 	}
