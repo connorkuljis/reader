@@ -1,0 +1,4 @@
+UseTab: Always         # Use tabs for indentation
+TabWidth: 4            # Set the tab width (adjust as necessary)
+IndentWidth: 4         # Set the indent width (should match TabWidth)
+
