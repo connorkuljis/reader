@@ -15,18 +15,15 @@ void cleanup(struct Reader *c);
 
 int main(void) {
 	struct Reader *r = createReader();
+
 	if (r == NULL) {
-		perror("error reading file content");
 		exit(EXIT_FAILURE);
 	}
 
-	if (read(r, "content/hello.txt") == -1) {
+	if (read(r, "content/t8.shakespeare.txt") == -1) {
 		exit(EXIT_FAILURE);
 	}
 
-	if (read(r, "content/hello.txt2") == -1) {
-		exit(EXIT_FAILURE);
-	}
 	print(r);
 
 	cleanup(r);
@@ -36,13 +33,22 @@ int main(void) {
 
 struct Reader *createReader() {
 	struct Reader *r = malloc(sizeof(struct Reader));
+
+	if (!r) {
+		perror("error allocating reader");
+		return NULL;
+	}
+
 	r->lines = NULL;
+
 	r->size = 0;
+
 	return r;
 }
 
 int read(struct Reader *r, const char *filename) {
 	FILE *f = fopen(filename, "r");
+
 	if (!f) {
 		perror("error opening file");
 		return -1;
@@ -53,25 +59,30 @@ int read(struct Reader *r, const char *filename) {
 	int n = 0;
 
 	while (getline(&lineBuf, &lineBufSize, f) != -1) {
-		// Reallocate memory for the array of lines.
+		// Bumps lines capacity by one.
 		r->lines = realloc(r->lines, (r->size + 1) * sizeof(char *));
+
 		if (!r->lines) {
-			perror("allocation error");
+			perror("error: unable to allocate lines.");
 			cleanup(r);
 			return -1;
 		}
 
-		// Allocate memory for the line, and copy line buffer content.
+		// Allocate enough memory for current line, including null terminator.
 		r->lines[r->size] = malloc((strlen(lineBuf) + 1) * sizeof(char));
+
 		if (!r->lines[r->size]) {
-			perror("allocation error");
+			perror("error: unable to allocate line.");
 			cleanup(r);
 			return -1;
 		}
+
+		// Copy line buffer contents to current line (indexed by current size).
 		strcpy(r->lines[r->size], lineBuf);
 
 		// Replace new line characters with null terminator if non-empty.
 		size_t read = strlen(r->lines[r->size]);
+
 		if (read > 0 && r->lines[r->size][read - 1] == '\n') {
 			r->lines[r->size][read - 1] = '\0';
 		}
@@ -93,7 +104,7 @@ void print(struct Reader *c) {
 }
 
 void cleanup(struct Reader *c) {
-	if (!c || !c->size) {
+	if (!c) {
 		return;
 	}
 

@@ -1,7 +1,7 @@
 CC=gcc
 MAIN=./main
-DEBUG_FLAGS=-fsanitize=address
 CFLAGS=-std=gnu99 -Wall -g
+DEBUG_FLAGS=-fsanitize=address
 
 ifdef DEBUG
     CFLAGS += $(DEBUG_FLAGS)
